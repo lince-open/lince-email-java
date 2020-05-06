@@ -1,0 +1,32 @@
+server:
+  port: ${LINCE_EMAIL_PORT:8080}
+
+spring:
+  application:
+    name: @project.artifactId@
+
+  profiles:
+    include: management
+
+  jackson:
+    default-property-inclusion: non_null
+    time-zone: America/Sao_Paulo
+
+  mail:
+    host: ${LINCE_EMAIL_SMTP_HOST:smtp.gmail.com}
+    port: ${LINCE_EMAIL_SMTP_PORT:465}
+    protocol: smtp
+    username: ${LINCE_EMAIL_SMTP_USER}
+    password: ${LINCE_EMAIL_SMTP_PASS}
+    test-connection: ${LINCE_EMAIL_TEST:false}
+    properties:
+      "mail.smtp.auth": true
+      "mail.smtp.starttls.enable": true
+      "mail.smtp.starttls.required": true
+      "mail.smtp.socketFactory.class": javax.net.ssl.SSLSocketFactory
+      "mail.debug": ${LINCE_EMAIL_SMTP_DEBUG:false}
+
+logging:
+  level:
+    work:
+      lince: WARN
