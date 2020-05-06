@@ -20,15 +20,15 @@ https://hub.docker.com/repository/docker/linceopen/lince-email
 mvn clean package dockerfile:build
 
 docker run --name lince-email \
--e LINCE_EMAIL_PORT='8080' \
--e LINCE_EMAIL_DATASOURCE_URL='jdbc:h2:file:~/lince-email' \
--e LINCE_JAVA_OPT='-Xms64m -Xmx128m' \
--p 51001:8080 \
+-e LINCE_EMAIL_SMTP_USER='user@gmail.com' \
+-e LINCE_EMAIL_SMTP_PASS='pass' \
+-e LINCE_JAVA_OPT='-Xms256m -Xmx256m' \
+-p 8080:8080 \
 -t lince-open/lince-email:latest
 
-docker tag lince-open/lince-email:latest linceopen/lince-email:0.0.10
+docker tag lince-open/lince-email:latest linceopen/lince-email:0.0.1
 
-docker push linceopen/lince-email:0.0.10
+docker push linceopen/lince-email:0.0.1
 
 docker tag lince-open/lince-email:latest linceopen/lince-email:latest
 
