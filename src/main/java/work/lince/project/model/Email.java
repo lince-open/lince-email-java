@@ -32,4 +32,6 @@ public class Email {
 
     private OffsetDateTime create;
 
+    private Set<EmailAttachment> attachments;
+
 }

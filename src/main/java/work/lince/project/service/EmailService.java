@@ -2,17 +2,19 @@ package work.lince.project.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import work.lince.commons.authentication.AuthenticationService;
 import work.lince.project.model.Email;
+import work.lince.project.model.EmailAttachment;
 import work.lince.project.model.EmailFormat;
 import work.lince.project.model.EmailStatus;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.util.ByteArrayDataSource;
+import java.util.Base64;
 import java.util.UUID;
 
 @Slf4j
@@ -45,31 +47,22 @@ public class EmailService {
     }
 
     protected Email send(Email email) {
-        if (email.getType() == EmailFormat.HTML) {
-            sendHtmlMessage(email);
-        } else {
-            sendSimpleMessage(email);
-        }
+        sendHtmlMessage(email);
         return email;
     }
 
-    public void sendSimpleMessage(Email email) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email.getTo().toArray(new String[email.getTo().size()]));
-        message.setSubject(email.getSubject());
-        message.setText(email.getBody());
-        emailSender.send(message);
-        email.setStatus(EmailStatus.SENT);
-    }
 
     public void sendHtmlMessage(Email email) {
 
         MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
         try {
-            helper.setText(email.getBody(), true); // Use this or above line.
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "utf-8");
+            helper.setText(email.getBody(), email.getType() == EmailFormat.HTML);
             helper.setTo(email.getTo().toArray(new String[email.getTo().size()]));
             helper.setSubject(email.getSubject());
+            if (email.getAttachments() != null) {
+                email.getAttachments().forEach(attachment -> addAttachment(helper, attachment));
+            }
             emailSender.send(mimeMessage);
             email.setStatus(EmailStatus.SENT);
         } catch (MessagingException e) {
@@ -77,4 +70,15 @@ public class EmailService {
         }
 
     }
+
+    protected void addAttachment(MimeMessageHelper helper, EmailAttachment attachment) {
+        try {
+            byte[] bytes = Base64.getDecoder().decode(attachment.getData());
+            ByteArrayDataSource ds = new ByteArrayDataSource(bytes, attachment.getType());
+            helper.addAttachment(attachment.getName(), ds);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
